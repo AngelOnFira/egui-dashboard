@@ -1,3 +1,5 @@
+use std::sync::atomic::{AtomicU32, self};
+
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use mime_guess::from_path;
 use rust_embed::RustEmbed;
@@ -41,4 +43,23 @@ pub fn init() {
             .unwrap()
             .block_on(async { start_server().await.unwrap() })
     });
+}
+
+// Create an atomic for IDs
+static ID: AtomicU32 = AtomicU32::new(0);
+
+pub enum ObjKind {
+    Button,
+}
+
+pub struct Object {
+    kind: ObjKind,
+    id: u32,
+}
+
+impl Object {
+    pub fn new(kind: ObjKind) -> Self {
+        let id = ID.fetch_add(1, atomic::Ordering::SeqCst);
+        Self { kind, id }
+    }
 }
