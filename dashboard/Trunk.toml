@@ -1,2 +1,2 @@
 [build]
-dist = "../core/dist"
+dist = "../dashboard_core/dist"

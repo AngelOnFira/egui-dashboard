@@ -20,19 +20,25 @@ async fn index() -> impl Responder {
     handle_embedded_file("index.html")
 }
 
-#[actix_web::get("/dist/{_:.*}")]
+#[actix_web::get("/{_:.*}")]
 async fn dist(path: web::Path<String>) -> impl Responder {
     handle_embedded_file(path.as_str())
 }
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn start_server() -> std::io::Result<()> {
     HttpServer::new(|| App::new().service(index).service(dist))
-        .bind("127.0.0.1:8000")?
+        .bind("0.0.0.0:8002")?
         .run()
         .await
 }
 
 pub fn init() {
     println!("Hello, world!");
+
+    // Start an async tokio thread for the server
+    std::thread::spawn(|| {
+        tokio::runtime::Runtime::new()
+            .unwrap()
+            .block_on(async { start_server().await.unwrap() })
+    });
 }
